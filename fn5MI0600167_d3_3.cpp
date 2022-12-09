@@ -10,7 +10,7 @@ char* minimalTime(char* const time1, char* const time2);
 void calculateMinimalNumberOfSites(char** departureTimes, char** landingTimes, const int N);
 void sortArraysBasedOnDepartureTimes(char** departureTimes, char** landingTimes, const int N);
 bool planesCanBeGrouped(char** const landingTimes, char** const departureTimes, const int N, const int i, const int j);
-
+void evaluateBusiestPeriods(char** departureTimes, char** landingTimes, const int N, const int maxNumberOfPlanesOnAirport);
 int main()
 {
 	int N;
@@ -21,18 +21,20 @@ int main()
 	}
 	char** landingTimes = new char*[N]();
 	for (int i = 0; i < N; i++) {
-		landingTimes[i] = new char[HHMM]();
+		landingTimes[i] = new char[HHMM + 1]();
 		for (int j = 0; j < HHMM; j++) {
 			std::cin >> landingTimes[i][j];
 		}
+		landingTimes[i][HHMM] = '\0';
 	}
 
 	char** departureTimes = new char* [N]();
 	for (int i = 0; i < N; i++) {
-		departureTimes[i] = new char[HHMM]();
+		departureTimes[i] = new char[HHMM + 1]();
 		for (int j = 0; j < HHMM; j++) {
 			std::cin >> departureTimes[i][j];
 		}
+		departureTimes[i][HHMM] = '\0';
 	}
 	//printTwoDimArray(landingTimes, N, 4);
 	//printTwoDimArray(departureTimes, N, 4);
@@ -74,8 +76,6 @@ void calculateMinimalNumberOfSites(char** departureTimes, char** landingTimes, c
 	int maxNumberOfPlanesOnAirport = 0;
 	int numberOfPlanesInGroup = 0;
 
-	char* busiestTimeStart;
-	char* busiestTimeEnd;
 
 	for (int i = 0; i < N; i++) {
 		numberOfPlanesInGroup = 1;
@@ -84,16 +84,16 @@ void calculateMinimalNumberOfSites(char** departureTimes, char** landingTimes, c
 			if (i == j) { continue; }
 			if (planesCanBeGrouped(landingTimes, departureTimes, N, i, j)) {
 				numberOfPlanesInGroup++;
-				busiestTimeStart = maximalTime(landingTimes[i], landingTimes[j]);
-				busiestTimeEnd = minimalTime(departureTimes[i], departureTimes[j]);
 			}
 		}
 		if (numberOfPlanesInGroup > maxNumberOfPlanesOnAirport) {
 			maxNumberOfPlanesOnAirport = numberOfPlanesInGroup;
 		}
 	}
-
+	std::cout << maxNumberOfPlanesOnAirport;
+	evaluateBusiestPeriods(departureTimes, landingTimes, N, maxNumberOfPlanesOnAirport);
 }
+
 void sortArraysBasedOnDepartureTimes(char** departureTimes, char** landingTimes, const int N) {
 
 }
@@ -127,4 +127,28 @@ char* minimalTime(char* const time1, char* const time2) {
 		result = time1;
 	}
 	return result;
+}
+
+void evaluateBusiestPeriods(char** departureTimes, char** landingTimes, const int N, const int maxNumberOfPlanesOnAirport) {
+	int numberOfPlanesInGroup = 0;
+	char* periodStart = nullptr;
+	char* periodEnd = nullptr; 
+	for (int i = 0; i < N; i++) {
+		numberOfPlanesInGroup = 1;
+		periodStart = landingTimes[i];
+		periodEnd = departureTimes[i];
+		//For each plane
+		for (int j = 0; j < N; j++) {
+			if (i == j) { continue; }
+			if (planesCanBeGrouped(landingTimes, departureTimes, N, i, j)) {
+				numberOfPlanesInGroup++;
+				periodStart = maximalTime(periodStart, landingTimes[j]);
+				periodEnd = minimalTime(periodEnd, departureTimes[j]);
+			}
+		}
+		if (numberOfPlanesInGroup == maxNumberOfPlanesOnAirport) {
+			std::cout << "\n";
+			std::cout << periodStart << "-" << periodEnd;
+		}
+	}
 }
