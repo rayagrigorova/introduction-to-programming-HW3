@@ -22,11 +22,12 @@ int main()
     int* binaryNumbers = new int[binaryNumbersSize]();
 
     while (1) {
-        std::cin >> numbers[ind];
         if (ind >= numbersSize) {
             increaseArraySize(numbers, numbersSize);
             increaseArraySize(binaryNumbers, binaryNumbersSize, 8);
         }
+        std::cin >> numbers[ind];
+
         //We will add the new number to the binary array
         addNumberToBinaryArray(numbers[ind], ind, binaryNumbers);
 
@@ -34,6 +35,7 @@ int main()
         //(or 2 zeroes after converting to decimal), 
         //the loop is exited. 
         if (containsTwoConsecutiveZeros(binaryNumbers, ind)) {
+            ind++;
             break;
         }
         ind++;
@@ -42,7 +44,7 @@ int main()
     int* binaryToDecimal = new int[binaryToDecimalSize]();
     convertBinaryToDecimal(binaryNumbers, ind, binaryToDecimal);
 
-    int numberOfCharacters = countCharacters(binaryToDecimal, binaryToDecimalSize, width);
+    int numberOfCharacters = countCharacters(binaryToDecimal, (ind * 8) / 3, width);
     if (!numberOfCharacters) {
         std::cout << numberOfCharacters << "\n";
         std::cout << "Invalid input";
@@ -52,8 +54,8 @@ int main()
 }
 
 void increaseArraySize(int* arr, int& currentSize, int factor) {
-    //First, I will create an array with size currentSize * 2
-    int* newArr = new int[currentSize + START_SIZE]();
+    //First, I will create a new array 
+    int* newArr = new int[currentSize + START_SIZE * factor]();
 
     //Copy everything from oldArr to newArr
     copyOldToNew(arr, currentSize, newArr);
@@ -77,16 +79,16 @@ void copyOldToNew(const int* oldArr, const int oldSize, int* newArr) {
 
 void addNumberToBinaryArray(int decimalNumber, const int ind, int* binaryArray) {
     //I will add the binary number in reverse order 
-    for (int i = ind * 8 + 7; i >= 0; i--) {
+    for (int i = ind * 8 + 7; i >= ind * 8; i--) {
         binaryArray[i] = decimalNumber % 2;
         decimalNumber /= 2;
     }
 }
 
 bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
+    int startIndex = ind * 8;
     //If the index > 0, it is possible that there is a pair of zeroes 
     //from the previous number 
-    int startIndex = ind * 8;
     if (ind > 0) {
         startIndex -= 3;
     }
@@ -111,11 +113,9 @@ int countCharacters(const int* arr, const int size, const int width) {
     //width
     int ctr = 0;
     for (int i = 0; i < size; i++) {
-        if (arr[i] != 0) {
-            ctr++;
-        }
+        ctr += arr[i];
     }
-    if (width % ctr != 0) { return 0; }
+    if (ctr == 0 || ctr % width != 0) { return 0; }
     return ctr;
 }
 
@@ -137,14 +137,13 @@ void drawShape(const int* arr, const int size, const int width, const int number
     const char FULL_STOP = '.';
 
     for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; i++) {
-            while (arr[arrIndex] == 0) { arrIndex++; }
-            switch (arrIndex % 2) {
-            //Even index => NUMBER_SIGN
-            case 0: std::cout << NUMBER_SIGN; break;
-            case 1: std::cout << FULL_STOP;
-            }
-        }
+        //For each row, there are a {width} number of digits to
+        //be printed. For this count, we will use a for loop 
+        //If the current arr[arrInd] = 0, then we increase the arrInd by 1
+        //Then, according to the arrInd, we print . or # as many times 
+        //as the value of arr[arrInd] is (arrInd is even => '.'
+        //arrInd is odd => '#')
+        
         std::cout << "\n";
     }
 }
