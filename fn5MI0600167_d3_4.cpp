@@ -8,7 +8,9 @@ void addNumberToBinaryArray(int decimalNumber, const int ind, int* binaryArray);
 bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind);
 void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr);
 int countCharacters(const int* arr, const int size, const int width);
-void drawShape(const int* arr, const int size, const int width, const int numberOfCharacters);
+void drawShape(const int* arr, const int ind, const int width, const int numberOfCharacters);
+void printCharNTimes(const char ch, const int numberOfTimes, const int width, int& charactersOnRow);
+
 int main()
 {
     int width;
@@ -31,11 +33,8 @@ int main()
         //We will add the new number to the binary array
         addNumberToBinaryArray(numbers[ind], ind, binaryNumbers);
 
-        //If the binary number contains 6 consecutive zeros
-        //(or 2 zeroes after converting to decimal), 
-        //the loop is exited. 
+        //If the binary number contains 6 consecutive zeros, the loop is exited. 
         if (containsTwoConsecutiveZeros(binaryNumbers, ind)) {
-            ind++;
             break;
         }
         ind++;
@@ -46,11 +45,10 @@ int main()
 
     int numberOfCharacters = countCharacters(binaryToDecimal, (ind * 8) / 3, width);
     if (!numberOfCharacters) {
-        std::cout << numberOfCharacters << "\n";
         std::cout << "Invalid input";
         return 0;
     }
-    drawShape(binaryToDecimal, binaryToDecimalSize, width, numberOfCharacters);
+    drawShape(binaryToDecimal, ind, width, numberOfCharacters);
 }
 
 void increaseArraySize(int* arr, int& currentSize, int factor) {
@@ -87,13 +85,16 @@ void addNumberToBinaryArray(int decimalNumber, const int ind, int* binaryArray) 
 
 bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
     int startIndex = ind * 8;
+
     //If the index > 0, it is possible that there is a pair of zeroes 
     //from the previous number 
     if (ind > 0) {
         startIndex -= 3;
     }
+
     int endIndex = ind * 8 + 8;
     int zeroesCtr = 0;
+
     for (int i = startIndex; i < endIndex; i++) {
         if (binaryNumbers[i] == 0) {
             zeroesCtr++;
@@ -108,13 +109,16 @@ bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
     return false;
 }
 
+//The input is invalid if the number of symbols isn't divisible by
+//width. In this case, the number of characters will be marked with zero.
 int countCharacters(const int* arr, const int size, const int width) {
-    //The input is invalid if the number of symbols isn't divisible by
-    //width
+
     int ctr = 0;
+
     for (int i = 0; i < size; i++) {
         ctr += arr[i];
     }
+
     if (ctr == 0 || ctr % width != 0) { return 0; }
     return ctr;
 }
@@ -129,22 +133,33 @@ void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr
     }
 }
 
-void drawShape(const int* arr, const int size, const int width, const int numberOfCharacters) {
+void drawShape(const int* arr, const int ind, const int width, const int numberOfCharacters) {
     const int height = numberOfCharacters / width;
     int arrIndex = 0;
 
-    const char NUMBER_SIGN = '#';
-    const char FULL_STOP = '.';
+    const char CHARACTER_1 = '.';
+    const char CHARACTER_2 = '#';
 
-    for (int i = 0; i < height; i++) {
-        //For each row, there are a {width} number of digits to
-        //be printed. For this count, we will use a for loop 
-        //If the current arr[arrInd] = 0, then we increase the arrInd by 1
-        //Then, according to the arrInd, we print . or # as many times 
-        //as the value of arr[arrInd] is (arrInd is even => '.'
-        //arrInd is odd => '#')
-        
-        std::cout << "\n";
+    int numberOfCharactersOnRow = 0;
+
+    for (int i = 0; i < (ind * 8) / 3; i++) {
+        switch (i % 2) {
+        case 0: printCharNTimes(CHARACTER_1, arr[i], width, numberOfCharactersOnRow); break;
+        case 1: printCharNTimes(CHARACTER_2, arr[i], width, numberOfCharactersOnRow);
+        }
+    }
+
+}
+
+void printCharNTimes(const char ch, const int numberOfTimes, const int width, int& charactersOnRow) {
+    for (int i = 0; i < numberOfTimes; i++) {
+        //If the characters on this row by now are too many, we should start a new line
+        if (charactersOnRow >= width) {
+            std::cout << "\n";
+            charactersOnRow = 0;
+        }
+        std::cout << ch;
+        charactersOnRow++;
     }
 }
 
