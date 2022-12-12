@@ -5,8 +5,8 @@ const int START_SIZE = 100;
 void increaseArraySize(int* arr, int& currentSize, int factor = 1);
 void copyOldToNew(const int* oldArr, const int oldSize, int* newArr);
 void addNumberToBinaryArray(int decimalNumber, const int ind, int* binaryArray);
-bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind);
-void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr);
+int containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind);
+void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr, const int firstZeroIndex);
 int countCharacters(const int* arr, const int size, const int width);
 void drawShape(const int* arr, const int ind, const int width, const int numberOfCharacters);
 void printCharNTimes(const char ch, const int numberOfTimes, const int width, int& charactersOnRow);
@@ -17,6 +17,7 @@ int main()
     std::cin >> width;
 
     int ind = 0;
+    int firstZeroInd = 0;
     int numbersSize = START_SIZE;
     int binaryNumbersSize = numbersSize * 8;
 
@@ -34,14 +35,15 @@ int main()
         addNumberToBinaryArray(numbers[ind], ind, binaryNumbers);
 
         //If the binary number contains 6 consecutive zeros, the loop is exited. 
-        if (containsTwoConsecutiveZeros(binaryNumbers, ind)) {
+        firstZeroInd = containsTwoConsecutiveZeros(binaryNumbers, ind);
+        if (firstZeroInd) {
             break;
         }
         ind++;
     }
     int binaryToDecimalSize = binaryNumbersSize / 3;
     int* binaryToDecimal = new int[binaryToDecimalSize]();
-    convertBinaryToDecimal(binaryNumbers, ind, binaryToDecimal);
+    convertBinaryToDecimal(binaryNumbers, ind, binaryToDecimal, firstZeroInd);
 
     int numberOfCharacters = countCharacters(binaryToDecimal, (ind * 8) / 3, width);
     if (!numberOfCharacters) {
@@ -83,7 +85,7 @@ void addNumberToBinaryArray(int decimalNumber, const int ind, int* binaryArray) 
     }
 }
 
-bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
+int containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
     int startIndex = ind * 8;
 
     //If the index > 0, it is possible that there is a pair of zeroes 
@@ -94,19 +96,22 @@ bool containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
 
     int endIndex = ind * 8 + 8;
     int zeroesCtr = 0;
+    //We should stop drawing after the first zero
+    int firstZeroInd = 0;
 
     for (int i = startIndex; i < endIndex; i++) {
         if (binaryNumbers[i] == 0) {
+            if (zeroesCtr == 0) { firstZeroInd = i; }
             zeroesCtr++;
         }
         else {
             zeroesCtr = 0;
         }
         if (zeroesCtr >= 6) {
-            return true;
+            return firstZeroInd;
         }
     }
-    return false;
+    return 0;
 }
 
 //The input is invalid if the number of symbols isn't divisible by
@@ -121,10 +126,11 @@ int countCharacters(const int* arr, const int size, const int width) {
 
     if (ctr == 0 || ctr % width != 0) { return 0; }
     return ctr;
+
 }
 
-void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr) {
-    int endIndex = ind * 8;
+void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr, const int firstZeroIndex) {
+    int endIndex = firstZeroIndex;
     int num = 0;
     int decimalIndex = 0;
     for (int i = 0; i + 3 < endIndex; i += 3) {
