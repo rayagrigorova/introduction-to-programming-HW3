@@ -2,11 +2,12 @@
 
 const int START_SIZE = 100;
 
-void increaseArraySize(int* arr, int& currentSize, int factor = 1);
-void copyOldToNew(const int* oldArr, const int oldSize, int* newArr);
+void increaseArraySize(int*& arr, int& currentSize, const int factor = 1);
+void copyOldToNew(const int* oldArr, const int oldSize, int*& newArr);
+
 void addNumberToBinaryArray(int decimalNumber, const int ind, int* binaryArray);
 int containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind);
-void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr, const int firstZeroIndex);
+void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr, const int endInputIndex);
 int countCharacters(const int* arr, const int size, const int width);
 void drawShape(const int* arr, const int ind, const int width, const int numberOfCharacters);
 void printCharNTimes(const char ch, const int numberOfTimes, const int width, int& charactersOnRow);
@@ -16,8 +17,8 @@ int main()
     int width;
     std::cin >> width;
 
-    int ind = 0;
-    int firstZeroInd = 0;
+    int numbersIndex = 0;
+    int endInputIndex = 0;
     int numbersSize = START_SIZE;
     int binaryNumbersSize = numbersSize * 8;
 
@@ -25,35 +26,35 @@ int main()
     int* binaryNumbers = new int[binaryNumbersSize]();
 
     while (1) {
-        if (ind >= numbersSize) {
+        if (numbersIndex >= numbersSize) {
             increaseArraySize(numbers, numbersSize);
             increaseArraySize(binaryNumbers, binaryNumbersSize, 8);
         }
-        std::cin >> numbers[ind];
+        std::cin >> numbers[numbersIndex];
 
         //We will add the new number to the binary array
-        addNumberToBinaryArray(numbers[ind], ind, binaryNumbers);
+        addNumberToBinaryArray(numbers[numbersIndex], numbersIndex, binaryNumbers);
 
         //If the binary number contains 6 consecutive zeros, the loop is exited. 
-        firstZeroInd = containsTwoConsecutiveZeros(binaryNumbers, ind);
-        if (firstZeroInd) {
+        endInputIndex = containsTwoConsecutiveZeros(binaryNumbers, numbersIndex);
+        numbersIndex++;
+        if (endInputIndex) {
             break;
         }
-        ind++;
     }
     int binaryToDecimalSize = binaryNumbersSize / 3;
     int* binaryToDecimal = new int[binaryToDecimalSize]();
-    convertBinaryToDecimal(binaryNumbers, ind, binaryToDecimal, firstZeroInd);
+    convertBinaryToDecimal(binaryNumbers, numbersIndex, binaryToDecimal, endInputIndex);
 
-    int numberOfCharacters = countCharacters(binaryToDecimal, (ind * 8) / 3, width);
+    int numberOfCharacters = countCharacters(binaryToDecimal, (numbersIndex * 8) / 3, width);
     if (!numberOfCharacters) {
         std::cout << "Invalid input";
         return 0;
     }
-    drawShape(binaryToDecimal, ind, width, numberOfCharacters);
+    drawShape(binaryToDecimal, numbersIndex, width, numberOfCharacters);
 }
 
-void increaseArraySize(int* arr, int& currentSize, int factor) {
+void increaseArraySize(int*& arr, int& currentSize, const int factor) {
     //First, I will create a new array 
     int* newArr = new int[currentSize + START_SIZE * factor]();
 
@@ -71,7 +72,7 @@ void increaseArraySize(int* arr, int& currentSize, int factor) {
 
 }
 
-void copyOldToNew(const int* oldArr, const int oldSize, int* newArr) {
+void copyOldToNew(const int* oldArr, const int oldSize, int*& newArr) {
     for (int i = 0; i < oldSize; i++) {
         newArr[i] = oldArr[i];
     }
@@ -96,19 +97,19 @@ int containsTwoConsecutiveZeros(const int* binaryNumbers, const int ind) {
 
     int endIndex = ind * 8 + 8;
     int zeroesCtr = 0;
-    //We should stop drawing after the first zero
-    int firstZeroInd = 0;
+    //We should stop drawing after the two consecutive zeros 
+    int endInputIndex = 0;
 
     for (int i = startIndex; i < endIndex; i++) {
         if (binaryNumbers[i] == 0) {
-            if (zeroesCtr == 0) { firstZeroInd = i; }
+            if (zeroesCtr == 0) { endInputIndex = i + 6; }
             zeroesCtr++;
         }
         else {
             zeroesCtr = 0;
         }
         if (zeroesCtr >= 6) {
-            return firstZeroInd;
+            return endInputIndex;
         }
     }
     return 0;
@@ -129,11 +130,10 @@ int countCharacters(const int* arr, const int size, const int width) {
 
 }
 
-void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr, const int firstZeroIndex) {
-    int endIndex = firstZeroIndex;
+void convertBinaryToDecimal(const int* binaryArr, const int ind, int* decimalArr, const int endInputIndex) {
     int num = 0;
     int decimalIndex = 0;
-    for (int i = 0; i + 3 < endIndex; i += 3) {
+    for (int i = 0; i + 3 < endInputIndex; i += 3) {
         num = 1 * binaryArr[i + 2] + 2 * binaryArr[i + 1] + 4 * binaryArr[i];
         decimalArr[decimalIndex++] = num;
     }
