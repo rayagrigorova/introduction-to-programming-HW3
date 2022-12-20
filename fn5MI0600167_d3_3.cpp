@@ -15,17 +15,15 @@
 
 const int HHMM = 4;
 
-void sortTimesInAscendingOrder(char** landingTimes, char** departureTimes, const int N);
-
-void printTwoDimArray(const char** const arr, int n, int m);
+//void printTwoDimArray(const char** const arr, int n, int m);
 
 int compareTimes(const char* const time1, const char* const time2);
 const char* maximalTime(const char* const time1, const char* const time2);
 const char* minimalTime(const char* const time1, const char* const time2);
 
-void calculateMinimalNumberOfSites(const char** const departureTimes, const char** const landingTimes, const int N);
-bool planesCanBeGrouped(const char** const landingTimes, const char** const departureTimes, const int N, const int i, const int j);
-void evaluateBusiestPeriods(const char** const departureTimes, const char** const landingTimes, const int N, const int maxNumberOfPlanesOnAirport);
+void calculateMinimalNumberOfSites(const char** const landingTimes, const char** const departureTimes, const int N);
+bool planesAreAtTheAirportAtTheSameTime(const char** const landingTimes, const char** const departureTimes, const int N, const int i, const int j);
+void evaluateBusiestPeriods(const char** const landingTimes, const char** const departureTimes, const int N, const int maxNumberOfPlanesOnAirport);
 
 void freeMemory(char** arr, const int rows);
 
@@ -38,7 +36,7 @@ int main()
 		return 0;
 	}
 
-	char** landingTimes = new char*[N]();
+	char** landingTimes = new char* [N]();
 	for (int i = 0; i < N; i++) {
 		landingTimes[i] = new char[HHMM + 1]();
 		for (int j = 0; j < HHMM; j++) {
@@ -55,25 +53,21 @@ int main()
 		}
 		departureTimes[i][HHMM] = '\0';
 	}
-	calculateMinimalNumberOfSites(departureTimes, landingTimes, N);
+	calculateMinimalNumberOfSites(landingTimes, departureTimes, N);
 
 	freeMemory(landingTimes, N);
 	freeMemory(departureTimes, N);
 }
 
-void sortTimesInAscendingOrder(char** landingTimes, char** departureTimes, const int N) {
-	//In the examples, the 
-}
-
-void printTwoDimArray(const char** arr, int n, int m) {
-	for (int i = 0; i < n; i++) {
-		std::cout << "\n";
-		for (int j = 0; j < m; j++) {
-			std::cout << arr[i][j];
-		}
-	}
-	std::cout << "\n\n\n";
-}
+//void printTwoDimArray(const char** arr, int n, int m) {
+//	for (int i = 0; i < n; i++) {
+//		std::cout << "\n";
+//		for (int j = 0; j < m; j++) {
+//			std::cout << arr[i][j];
+//		}
+//	}
+//	std::cout << "\n\n\n";
+//}
 
 //This function returns:
 // -> 1 if time1 > time2
@@ -91,8 +85,8 @@ int compareTimes(const char* const time1, const char* const time2) {
 	return 0;
 }
 
-void calculateMinimalNumberOfSites(const char** const departureTimes, const char** const landingTimes, const int N) {
-	//My goal is to group each plane with as many as I possibly can
+void calculateMinimalNumberOfSites(const char** const landingTimes, const char** const departureTimes, const int N) {
+	//My goal is to find the intersection 
 	//in order to find the busiest period at the airport 
 	//and from there - the minimal number of sites needed 
 
@@ -104,7 +98,7 @@ void calculateMinimalNumberOfSites(const char** const departureTimes, const char
 		numberOfPlanesInGroup = 1;
 		for (int j = 0; j < N; j++) {
 			if (i == j) { continue; }
-			if (planesCanBeGrouped(landingTimes, departureTimes, N, i, j)) {
+			if (planesAreAtTheAirportAtTheSameTime(landingTimes, departureTimes, N, i, j)) {
 				numberOfPlanesInGroup++;
 			}
 		}
@@ -113,12 +107,12 @@ void calculateMinimalNumberOfSites(const char** const departureTimes, const char
 		}
 	}
 	std::cout << maxNumberOfPlanesOnAirport;
-	evaluateBusiestPeriods(departureTimes, landingTimes, N, maxNumberOfPlanesOnAirport);
+	evaluateBusiestPeriods(landingTimes, departureTimes, N, maxNumberOfPlanesOnAirport);
 }
 
-bool planesCanBeGrouped(const char** const landingTimes, const char** const departureTimes, const int N, const int i, const int j) {
-	//Grouping is possible if the landing time of the second plane is between 
-	//the landing and departure times of the first 
+bool planesAreAtTheAirportAtTheSameTime(const char** const landingTimes, const char** const departureTimes, const int N, const int i, const int j) {
+	//If the times of the second plane are between 
+	//the landing and departure times of the first, they are at the airport together. 
 	//This means that landingTimeSecond >= landingTimeFirst
 	//and landingTimeSecond <= departureTimeFirst
 	return((compareTimes(landingTimes[j], landingTimes[i]) >= 0)
@@ -147,10 +141,10 @@ const char* minimalTime(const char* const time1, const char* const time2) {
 	return result;
 }
 
-void evaluateBusiestPeriods(const char** const departureTimes, const char** const landingTimes, const int N, const int maxNumberOfPlanesOnAirport) {
+void evaluateBusiestPeriods(const char** const landingTimes, const char** const departureTimes, const int N, const int maxNumberOfPlanesOnAirport) {
 	int numberOfPlanesInGroup = 0;
 	const char* periodStart = nullptr;
-	const char* periodEnd = nullptr; 
+	const char* periodEnd = nullptr;
 	for (int i = 0; i < N; i++) {
 		numberOfPlanesInGroup = 1;
 		periodStart = landingTimes[i];
@@ -158,7 +152,7 @@ void evaluateBusiestPeriods(const char** const departureTimes, const char** cons
 		//For each plane
 		for (int j = 0; j < N; j++) {
 			if (i == j) { continue; }
-			if (planesCanBeGrouped(landingTimes, departureTimes, N, i, j)) {
+			if (planesAreAtTheAirportAtTheSameTime(landingTimes, departureTimes, N, i, j)) {
 				numberOfPlanesInGroup++;
 				periodStart = maximalTime(periodStart, landingTimes[j]);
 				periodEnd = minimalTime(periodEnd, departureTimes[j]);
